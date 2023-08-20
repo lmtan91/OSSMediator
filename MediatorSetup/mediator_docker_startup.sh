@@ -28,17 +28,10 @@ docker start ndac_oss_opensearch 2>/dev/null || docker run --name "ndac_oss_open
 
 mkdir -p grafana_storage
 chown 472:472 grafana_storage/
-docker start ndac_grafana 2>/dev/null || docker run -d --name "ndac_grafana" --network host -e "GF_INSTALL_PLUGINS=grafana-opensearch-datasource" -e "GF_USERS_DEFAULT_THEME=light" -v $(pwd)/grafana_storage:/var/lib/grafana -v $(pwd)/grafana_data/provisioning/dashboards:/etc/grafana/provisioning/dashboards -v $(pwd)/grafana_data/provisioning/datasources:/etc/grafana/provisioning/datasources -v $(pwd)/grafana_data/dashboards:/etc/grafana/dashboards grafana/grafana-oss:9.3.6
 
-## Cutomizing login page
-# Replace Logo
-docker cp ./customizied_login_page/Logo_Celanese.svg ndac_grafana:/usr/share/grafana/public/img/grafana_icon.svg
-# Update Title
-# Update Login Title
-docker cp ./customizied_login_page/build/2362.5e93872490cc5d80351e.js ndac_grafana:/usr/share/grafana/public/build/ 
-docker cp ./customizied_login_page/build/2362.5e93872490cc5d80351e.js.map ndac_grafana:/usr/share/grafana/public/build/
-# Update background
-docker cp ./customizied_login_page/light-background.svg ndac_grafana:/usr/share/grafana/public/img/g8_login_light.svg
+# Hosting Grafana in nginx port 80 and port 443 (SSL).
+docker compose down 
+docker compose up -d --build 
 
 docker start ndac_oss_collector 2>/dev/null || docker run -d --name "ndac_oss_collector" --network host -v $(pwd)/reports:/reports  -v $(pwd)/collector/log:/collector/log -v $(pwd)/collector/checkpoints:/collector/bin/checkpoints -v $(pwd)/.secret:/collector/bin/.secret -v $(pwd)/collector_conf.json:/collector/resources/conf.json ossmediatorcollector:$version
 sleep 30
